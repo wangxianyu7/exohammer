@@ -11,9 +11,12 @@ _A python library designed to provide utility for performing bayesian analysis o
 ## Installation
 ___
 
-Once you clone/fork/download/etc this repo on your local machine, you can install the library by following these steps:
+This installation assumes you already have conda on your local machine and that you intend to use _exohammer_ in a dedicated virtual environment. You can install the exohammer using these steps:
+- Clone the repo with `git clone https://github.com/nick-juliano/exohammer.git`
 - cd into the directory
-- run `pip install .`
+- run `sh install.sh <conda_environment_name>`
+
+The result will be a functioning instance of _exohammer_ within a conda environment with the name of your choice. You can activate it with `conda activate <conda_environment_name>`.
 
 
 ## Usage
