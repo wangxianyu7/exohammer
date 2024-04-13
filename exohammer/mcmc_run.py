@@ -247,8 +247,8 @@ class MCMCRun:
 		ax.set_ylabel("lnprob")
 		ax.yaxis.set_label_coords(-0.1, 0.5)
 
-		for i in range(1,len(self.system.variable_labels)):
-			ax = axes[i]
+		for i in range(len(self.system.variable_labels)):
+			ax = axes[i+1]
 			ax.plot(samples[:, :, i], "k", alpha=0.3)
 			ax.set_xlim(0, len(samples))
 			ax.set_ylabel(self.system.variable_labels[i])
