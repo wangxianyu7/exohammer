@@ -237,9 +237,17 @@ class MCMCRun:
 		filename = self.output_path + "Chains_" + self.date + '.png'
 		if samples is None:
 			samples = self.sampler.get_chain(discard=self.discard, thin=self.thin)
-		fig, axes = plt.subplots(len(self.system.variable_labels), figsize=(20, 30), sharex=True)
+			log_prob = self.sampler.get_log_prob(discard=self.discard, thin=self.thin)
+		fig, axes = plt.subplots(int(len(self.system.variable_labels)+1), figsize=(20, 30), sharex=True)
 		fig.suptitle('chains', fontsize=30)
-		for i in range(len(self.system.variable_labels)):
+  
+		ax = axes[0]
+		ax.plot(log_prob, "k", alpha=0.3)
+		ax.set_xlim(0, len(log_prob))	
+		ax.set_ylabel("lnprob")
+		ax.yaxis.set_label_coords(-0.1, 0.5)
+
+		for i in range(1,len(self.system.variable_labels)):
 			ax = axes[i]
 			ax.plot(samples[:, :, i], "k", alpha=0.3)
 			ax.set_xlim(0, len(samples))
