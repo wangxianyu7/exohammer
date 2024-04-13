@@ -122,7 +122,7 @@ class MCMCRun:
 		import multiprocessing as mp
 		pool = mp.Pool(mp.cpu_count())
 		niter = 500
-		de_repeat = 1
+		de_repeat = 100
 		if os.path.exists('./Output/p0.npy'):
 			print('Loading previous DE optimization results')
 			p0 = np.load('./Output/p0.npy')
