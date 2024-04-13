@@ -134,6 +134,7 @@ class MCMCRun:
 			
 			if min_ptp > fitness_ptp:
 				print('DE converged')
+				break
 			else:
 				print(min_ptp, fitness_ptp)
 				print('DE not converged')	
