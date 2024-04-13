@@ -14,7 +14,7 @@ ___
 This installation assumes you already have conda on your local machine and that you intend to use _exohammer_ in a dedicated virtual environment. You can install the exohammer using these steps:
 - Clone the repo with `git clone https://github.com/nick-juliano/exohammer.git`
 - cd into the directory
-- run `sh install.sh <conda_environment_name>`
+- conda create -n exohammer python==3.8; conda activate exohammer
 
 The result will be a functioning instance of _exohammer_ within a conda environment with the name of your choice. You can activate it with `conda activate <conda_environment_name>`.
 
