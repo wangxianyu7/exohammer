@@ -302,7 +302,7 @@ def plot_ttvs(nplanets, measured, epoch, error, model, model_epoch, filename=Non
     plt.close('all')
 
 
-def plot_rvs(bjd, rv, rv_err, rv_model, filename, silent = False):
+def plot_rvs(bjd, rv, rv_err, rv_model, filename, silent = False, time_sim = None, rv_sim = None):
     """
     Plot radial velocities
 
@@ -319,17 +319,19 @@ def plot_rvs(bjd, rv, rv_err, rv_model, filename, silent = False):
     frame1 = fig1.add_axes((.1, .3, .8, .6))
     frame1.set_title('RVs')
     frame1.set_ylabel('')
-    plt.errorbar(bjd, rv, rv_err, fmt='o', label='RVs From Keck Data')
-    plt.plot(bjd, rv_model, 'or', label='best fit')  # Best fit model
+    plt.errorbar(bjd, rv, rv_err, fmt='o', label='RVs From Keck Data',zorder=10)
+    plt.plot(bjd, rv_model, 'or', label='best fit',zorder=10)  # Best fit model
+    if time_sim is not None and rv_sim is not None:
+        plt.plot(time_sim, rv_sim, '-g', label='simulated data',zorder=0)
+    
     plt.ylabel('RV [m/s]')
     plt.xlabel('BJD')
-    plt.grid()
     plt.legend(fontsize=8)
 
     # plot residuals
     frame2 = fig1.add_axes((.1, .1, .8, .2))
     plt.plot(bjd, rv_resid, 'dr')
-    plt.grid()
+    plt.axhline(0, color='black', lw=2)
     plt.xlabel('BJD')
     frame2.set_title('Residuals')
     frame2.set_yticks([-20, -10, 0, 10, 20])
