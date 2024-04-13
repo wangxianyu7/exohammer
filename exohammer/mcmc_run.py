@@ -4,7 +4,7 @@ from os import path, makedirs, getcwd
 from datetime import datetime
 from time import perf_counter
 from numpy import argmax
-
+import numpy as np
 import emcee
 import corner
 import matplotlib.pyplot as plt
@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from exohammer.system import System
 from exohammer.store import StoreRun
 from exohammer.utilities import sampler_to_theta_max, bic, plot_rvs, plot_ttvs
-
+import os
 
 class MCMCRun:
 	def __init__(self, planetary_system, data, lnprob=None):
@@ -87,12 +87,70 @@ class MCMCRun:
 		self.total_iterations = total_iterations
 		self.pos = self.system.initial_state(self.nwalkers)
 
+
+
+
+
+		#  DE optimization Start, added by Xian-Yu Wang, Apr 13, 2024
+		p0 = self.pos
+		de_bounds = []
+		orbital_elements = self.system.orbital_elements
+		for j in orbital_elements:
+			element = orbital_elements[j]
+			if len(element) == 2:
+				minimum = element[0]
+				maximum = element[1]
+				de_bounds.append([minimum, maximum])
+		de_bounds = np.array(de_bounds)
+
+		from de import DiffEvol
+		from tqdm.auto import tqdm
+		def optimize_global(niter=200, npop=50, population=None, pool=None, lnpost=None, vectorize=True, bounds=None,
+								label='Global optimisation', leave=False, plot_convergence: bool = True, use_tqdm: bool = True, args=[], kwargs={},
+								plot_parameters: tuple = (0, 2, 3, 4)):
+
+				lnpost = lnpost
+	
+				de = DiffEvol(lnpost, bounds, npop, maximize=True, vectorize=vectorize, pool=pool, args=args, kwargs=kwargs)
+				de._population[:, :] = population
+				for _ in tqdm(de(niter), total=niter, desc=label, leave=leave, disable=(not use_tqdm)):
+					pass
+				return de.minimum_location, de.minimum_value, de.minimum_location, de.minimum_value, de._population,de.min_ptp,de._fitness.ptp()
+			
+
+		print('Running DE')
+		import multiprocessing as mp
+		pool = mp.Pool(mp.cpu_count())
+		niter = 500
+		de_repeat = 10
+		if os.path.exists('./Output/p0.npy'):
+			print('Loading p0')
+			p0 = np.load('./Output/p0.npy')
+		population = p0
+		for i in range(de_repeat):
+			print('DE repeat:', i)
+			minimum_location, minimum_value, population, population_values, population, min_ptp, fitness_ptp = optimize_global(niter=niter, npop=self.nwalkers, \
+									population=population, pool=pool, lnpost=self.lnprob, args=[self.system], vectorize=False, bounds=de_bounds, label='Global optimisation', leave=False, use_tqdm=True, plot_parameters=(0, 2, 3, 4))
+			
+			if min_ptp > fitness_ptp:
+				print('DE converged')
+			else:
+				print(min_ptp, fitness_ptp)
+				print('DE not converged')	
+    
+
+		self.pos = population
+		# DE optimization END, added by Xian-Yu Wang, Apr 13, 2024
+		np.save('./Output/p0.npy', p0)
+  
+  
 		sampler = emcee.EnsembleSampler(self.nwalkers,
 		                                self.system.ndim,
 		                                self.lnprob,
 		                                args=[self.system],
 		                                moves=self.moves,
-		                                live_dangerously=True)
+		                                live_dangerously=True,
+		                                pool=pool)	
 
 		nrepeat = int(total_iterations / checkpoints)
 		completed = 0
@@ -131,6 +189,8 @@ class MCMCRun:
 			self.thin = int(self.niter * thinning_factor)
 			completed += checkpoints
 		print("Run complete")
+		pool.close()
+		pool.join()
 
 	def plot_corner(self, samples=None, save=True):
 		"""
