@@ -8,10 +8,10 @@ import numpy as np
 import emcee
 import corner
 import matplotlib.pyplot as plt
-
+from ttvfast import ttvfast
 from exohammer.system import System
 from exohammer.store import StoreRun
-from exohammer.utilities import sampler_to_theta_max, bic, plot_rvs, plot_ttvs
+from exohammer.utilities import sampler_to_theta_max, bic, plot_rvs, plot_ttvs, generate_planets
 import os
 
 class MCMCRun:
@@ -122,13 +122,13 @@ class MCMCRun:
 		import multiprocessing as mp
 		pool = mp.Pool(mp.cpu_count())
 		niter = 500
-		de_repeat = 10
+		de_repeat = 1
 		if os.path.exists('./Output/p0.npy'):
-			print('Loading p0')
+			print('Loading previous DE optimization results')
 			p0 = np.load('./Output/p0.npy')
 		population = p0
 		for i in range(de_repeat):
-			print('DE repeat:', i)
+			print('DE repeat:', i, 'of', de_repeat, end='; ')
 			minimum_location, minimum_value, population, population_values, population, min_ptp, fitness_ptp = optimize_global(niter=niter, npop=self.nwalkers, \
 									population=population, pool=pool, lnpost=self.lnprob, args=[self.system], vectorize=False, bounds=de_bounds, label='Global optimisation', leave=False, use_tqdm=True, plot_parameters=(0, 2, 3, 4))
 			
@@ -257,8 +257,24 @@ class MCMCRun:
 		"""
 
 		__, __, rv_model = self.system.model(self.theta_max, self.system)
+
+		dt =  30/60/24
+		au_per_day = 1731460  # meters per second
+		time_sim = list(np.arange(np.min(self.system.rvbjd), np.max(self.system.rvbjd), dt))
+		# print('time_sim', time_sim)
+		model = ttvfast(generate_planets(self.theta_max, self.system),
+								self.system.mstar,
+								self.system.tmin - dt,
+								dt,
+								self.system.tmax + dt,
+								rv_times=time_sim)
+
+		rv_sim = np.asarray(model['rv']) * au_per_day
+  
+  
+  
 		filename = self.output_path + "rvs_" + self.date + '.png'
-		plot_rvs(self.system.rvbjd, self.system.rvmnvel, self.system.rverrvel, rv_model, filename, self.silent)
+		plot_rvs(self.system.rvbjd, self.system.rvmnvel, self.system.rverrvel, rv_model, filename, self.silent, time_sim=time_sim, rv_sim=rv_sim)
 
 	def plot_ttvs(self):
 		"""
