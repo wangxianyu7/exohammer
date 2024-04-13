@@ -6,3 +6,5 @@ numpy==1.22
 pandas==1.0.5
 ttvfast==0.3.0
 easygui==0.98.3
+numba==0.58.1
+numexpr==2.8.6
