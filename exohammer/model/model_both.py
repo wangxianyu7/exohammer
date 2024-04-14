@@ -33,4 +33,31 @@ def model_both(theta, system):
         mod.append(model_temp.tolist())
         epo.append(epoch_temp.tolist())
 
+
+
+
+
+    # Importing the system parameters
+    fixed_labels = system.fixed_labels
+    fixed_values = system.fixed
+    variable_labels = system.variable_labels
+    orb_elements = []
+
+    for i in range(len(fixed_values)):
+        orb_elements.append({'element': fixed_labels[i],
+                             'value': fixed_values[i]})
+    for i in range(len(variable_labels)):
+        orb_elements.append({'element': variable_labels[i],
+                             'value': theta[i]})
+
+
+    rv_insts_unique = list(set(system.rvinsts))
+    rv_insts_unique.sort()
+    for i in range(len(rv_insts_unique)):
+        for j in orb_elements:
+            if j['element'] == rv_insts_unique[i] + '_offset':
+                offset = j['value']
+        idx = where(array(system.rvinsts) == rv_insts_unique[i])
+        rv_model[idx] = rv_model[idx] + offset
+
     return mod, epo, rv_model
