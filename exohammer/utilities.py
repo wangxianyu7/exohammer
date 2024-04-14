@@ -3,9 +3,8 @@
 from astropy import constants as const
 from numpy import log, argmax, array, zeros, sin, cos, pi, exp
 from ttvfast import models
-
+import numpy as np
 import matplotlib.pyplot as plt
-
 mearth = const.M_earth.cgs.value  # grams
 msun = const.M_sun.cgs.value
 au_per_day = 1731460  # meters per second
@@ -157,17 +156,23 @@ def generate_planets(theta, system):
                 mass = i['value']
             elif i['element'] == 'period_' + planet_designation[j]:
                 period = i['value']
-            elif i['element'] == 'eccentricity_' + planet_designation[j]:
-                eccentricity = i['value']
+            elif i['element'] == 'esinw_' + planet_designation[j]:
+                esinw = i['value']
             elif i['element'] == 'inclination_' + planet_designation[j]:
                 inclination = i['value']
             elif i['element'] == 'longnode_' + planet_designation[j]:
                 longnode = i['value']
-            elif i['element'] == 'argument_' + planet_designation[j]:
-                argument = i['value']
+            elif i['element'] == 'ecosw_' + planet_designation[j]:
+                ecosw = i['value']
             elif i['element'] == 'mean_anomaly_' + planet_designation[j]:
                 mean_anomaly = i['value']
-
+        eccentricity = (esinw ** 2 + ecosw ** 2) ** 0.5
+        # make sure the argument is between 0 and 360
+        argument = np.rad2deg(np.arctan2(esinw, ecosw))
+        if argument<0:
+            argument = argument+360
+        if argument>360:
+            argument = argument-360
         planet = models.Planet(mass=mass,  # M_sun
                                period=period,  # days
                                eccentricity=eccentricity,
