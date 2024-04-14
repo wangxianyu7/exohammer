@@ -44,6 +44,7 @@ class System:
         self.rvbjd = Data.rvbjd
         self.rvmnvel = Data.rvmnvel
         self.rverrvel = Data.rverrvel
+        self.rvinsts = Data.rvinsts
         self.tmin = Data.tmin
         self.tmax = Data.tmax
         self.model = initialize_model(self)
