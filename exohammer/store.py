@@ -30,7 +30,7 @@ class StoreRun:
 
         pkl_object_data = Data(sys.mstar,
                                [sys.epoch, sys.measured, sys.error],
-                               [sys.rvbjd, sys.rvmnvel, sys.rverrvel])
+                               [sys.rvbjd, sys.rvmnvel, sys.rverrvel, sys.rvinsts])
         filename = self.run.output_path + "pickle_data.obj"
         file = open(filename, 'wb')
         dump(pkl_object_data, file)
