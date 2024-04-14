@@ -25,6 +25,7 @@ class Data:
 		self.rvbjd = rvs[0]
 		self.rvmnvel = rvs[1]
 		self.rverrvel = rvs[2]
+		self.rvinsts = rvs[3]
 
 		# self.nplanets_fit = len(self.epoch)
 
