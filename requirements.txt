@@ -9,3 +9,4 @@ easygui==0.98.3
 numba==0.58.1
 numexpr==2.8.6
 tqdm==4.65.0
+scipy==1.10.1
